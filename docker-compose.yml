@@ -3,6 +3,8 @@ version: '2.1'
 networks:
   monitor-net:
     driver: bridge
+  nginx-proxy: # WARNING: You should create it first. Use: 'docker network create nginx-proxy'
+    external: true
 
 volumes:
     prometheus_data: {}
@@ -131,5 +133,19 @@ services:
     restart: unless-stopped
     networks:
       - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
+
+  nginxexporter:
+    image: nginx/nginx-prometheus-exporter:0.9.0
+    container_name: nginxexporter
+    restart: unless-stopped
+    command: 
+      - "-nginx.scrape-uri=http://nginx-proxy:8081/nginx_status"
+    expose:
+      - 9113
+    networks:
+      - monitor-net
+      - nginx-proxy
     labels:
       org.label-schema.group: "monitoring"

@@ -1,7 +1,7 @@
 {
   "id": null,
-  "title": "Nginx (Alex)",
-  "description": "Nginx exporter metrics (Alex)",
+  "title": "Nginx",
+  "description": "Nginx exporter metrics",
   "tags": [
     "nginx"
   ],
@@ -57,7 +57,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "nginx_connections_accepted",
+              "expr": "sum(irate(nginx_connections_processed_total{stage=\"any\"}[5m])) by (stage)",
               "hide": false,
               "interval": "",
               "intervalFactor": 10,
@@ -312,7 +312,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\"nginx-proxy\"}[5m])) / count(node_cpu_seconds_total{mode=\"system\"}) * 100",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\"nginx\"}[5m])) / count(node_cpu_seconds_total{mode=\"system\"}) * 100",
               "intervalFactor": 2,
               "legendFormat": "nginx",
               "refId": "A",

@@ -357,3 +357,40 @@ To run the grafana container as `user: 104` change your `docker-compose.yml` lik
     labels:
       org.label-schema.group: "monitoring"
 ```
+
+##### Adding support for nginx-proxy
+
+You need to enable nginx stub_status, add the nginx-prometheus-exporter, change the prometheus.yml, add/change a grafana dashboard
+In Detail
+
+1. Enable nginx stub_status. Add a stub.conf in conf.d/
+
+```None
+server { 
+	listen nginx-proxy:8081; 
+	server_name nginx-proxy; 
+	location /nginx_status { 
+		stub_status on; 
+		allow all; 
+	} 
+}
+```
+Test: docker exec nginx-proxy-letsencrypt wget -qO - http://nginx-proxy:8081/nginx_status
+
+2. Add nginx/nginx-prometheus-exporter in docker-compose
+  The command should be "-nginx.scrape-uri=http://nginx-proxy:8081/nginx_status"
+  It should be in the same network as nginx-proxy
+
+Test: docker exec nginx-proxy-letsencrypt wget -qO - http://nginxexporter:9113/metrics
+
+3. Add a new scrape in prometheus.yml like this:
+
+```None
+  - job_name: 'nginxexporter'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['nginxexporter:9113']
+```
+Test: Open prometheus in browser (http://{url}:9090)
+
+4. Add / Change a grafana dashboard
